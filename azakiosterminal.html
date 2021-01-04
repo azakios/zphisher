@@ -1,0 +1,503 @@
+<!--Azakios Team Management-->
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>Azakios Terminal</title>
+    </head>
+    <body>
+    <div><button type="button" class="btn btn-info">Powered By</button>
+        <button type="button" class=btn btn-delete">Azakios Team</button>
+    <marquee behaviour="alternate"><b><mark>Powered By Azakios</mark></b></marquee>
+    <button type="button" class=btn btn-delete"><b>Designed / Created By <enum>Mir Aafaq</enum>   [ Azakios ]</b></button> 
+    
+    
+    </div>
+        <div id="terminal">
+            <div id="head">
+<pre class="center">[<enum1>Azakios</enum1>][Hacking Terminal]</pre>                
+                <pre>AZAKIOS TERMINAL<a href="https://www.sololearn.com/learn/9603/?ref=app">Azakios on Youtube</a>)<br>(<a href="https://www.sololearn.com/post/9160/?ref=app">Azakios Team</a>)
+                    <br />Type help or list<br>To see list of supported commands
+                </pre>
+            </div>
+        </div>
+        <canvas id="canvas" tabindex='1'></canvas>
+        
+        
+        
+        
+        <script>
+            
+            // Created By Azakios Team 
+var terminal;
+
+window.onload = function()
+{
+    terminal = document.getElementById("terminal");
+    
+    addInput();
+}
+
+
+function addInput()
+{
+    var commandInputs = document.getElementsByTagName("input");
+    if (commandInputs.length > 0)
+        commandInputs[commandInputs.length - 1].disabled = true;
+    
+    terminal.insertAdjacentHTML('beforeend', '<div class="command">'
+        + '<span class="prompt">|Terminal©Azakios| $>&nbsp;</span>'
+        + '<input type="text" class="commandInput" maxlength="40" autocorrect="off" autocapitalize="none"/>'
+        + '</div>');
+        
+    commandInputs = document.getElementsByTagName("input");
+    var commandInput = commandInputs[commandInputs.length - 1];
+    commandInput.focus();
+    
+    commandInput.addEventListener('keypress', function keypress(evt)
+    {
+        if (evt.keyCode === 13)
+        {
+            removeEventListener('keypress', keypress);
+            var res = doCommand(this.value);
+            addOutput(res['output']);
+            if (res['addInput'])
+                addInput();
+        }
+    }, false);
+}
+
+function addOutput(output)
+{
+    terminal.insertAdjacentHTML('beforeend', '<div class="output">'
+        + output
+        + '</div>');
+    var divs = document.getElementsByTagName("pre");
+    if (divs.length > 0)
+        divs[divs.length - 1].scrollIntoView(false);
+}
+
+function doCommand(command)
+{
+    if (command == "help" || command == "list")
+        return help();
+    else if (command == "engage")
+        return engage();
+    else if (command == "connect")
+        return connect();
+    else if (command == "datetime")
+        return datetime();
+    else if (command == "echo" || command.startsWith("echo "))
+        return echo(command);
+    else if (command == "clear")
+        return clear();
+    else if (command == "matrix")
+        return matrix();
+    else if (command == "history")
+        return history();
+    else if (command == "about")
+        return about();
+
+    return {'output': "Command not found", 'addInput': true};
+}
+
+function help()
+{
+    return {'output': "<pre>Commands list: help, \n \n list, \n \n engage, \n \n connect, \n \n datetime, \n \n echo, \n \n clear, \n \n matrix, \n \n history, \n \n about</pre>", 'addInput': true};
+}
+
+function engage()
+{
+    terminal.style.display = 'none';
+    var c = document.getElementById("canvas");
+    c.style.display = 'block';
+    var ctx = c.getContext("2d");
+
+    c.height = window.innerHeight;
+    c.width = window.innerWidth;
+    
+    //chinese characters - taken from the unicode charset
+    var Azakios = "A z a k i o s";
+    //converting the string into an array of single characters
+    Azakios = Azakios.split("");
+    
+    var font_size = 10;
+    var columns = c.width/font_size; //number of columns for the rain
+    //an array of drops - one per column
+    var drops = [];
+    //x below is the x coordinate
+    //1 = y co-ordinate of the drop(same for every drop initially)
+    for(var x = 0; x < columns; x++)
+        drops[x] = 1; 
+    
+    //drawing the characters
+    function draw()
+    {
+        //Black BG for the canvas
+        //translucent BG to show trail
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, c.width, c.height);
+        
+        ctx.fillStyle = "#0F0"; //green text
+        ctx.font = font_size + "px arial";
+        //looping over drops
+        for(var i = 0; i < drops.length; i++)
+        {
+            //a random chinese character to print
+            var text = Azakios[Math.floor(Math.random()*Azakios.length)];
+            //x = i*font_size, y = value of drops[i]*font_size
+            ctx.fillText(text, i*font_size, drops[i]*font_size);
+            
+            //sending the drop back to the top randomly after it has crossed the screen
+            //adding a randomness to the reset to make the drops scattered on the Y axis
+            if(drops[i]*font_size > c.height && Math.random() > 0.975)
+                drops[i] = 0;
+            
+            //incrementing Y coordinate
+            drops[i]++;
+        }
+    }
+    
+    var int = setInterval(draw, 33);
+    
+    c.focus();
+    
+    function keypress(evt)
+    {
+        c.removeEventListener('keypress', keypress, true);
+        c.removeEventListener('click', click, true);
+        
+        clearInterval(int);
+        
+        c.style.display = "none";
+        
+        terminal.style.display = "block";
+        
+        addInput();
+    }
+    function click(evt)
+    {
+        c.removeEventListener('keypress', keypress, true);
+        c.removeEventListener('click', click, true);
+        
+        clearInterval(int);
+        
+        c.style.display = "none";
+        
+        terminal.style.display = "block";
+        
+        addInput();
+    }
+    
+    c.addEventListener('keypress', keypress, true);
+    
+    c.addEventListener('click', click, true);
+    
+    return {'output': "<pre>Matrix animation from https://codepen.io/P3R0/pen/MwgoKv</pre>", 'addInput': false};
+}
+
+function matrix()
+{
+    terminal.style.display = 'none';
+    var c = document.getElementById("canvas");
+    c.style.display = 'block';
+    var ctx = c.getContext("2d");
+
+    //making the canvas full screen
+    c.height = window.innerHeight;
+    c.width = window.innerWidth;
+
+    //chinese characters - taken from the unicode charset
+    var matr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+    //converting the string into an array of single characters
+    matr = matr.split("");
+
+    var font_size = 10;
+    var columns = c.width/font_size; //number of columns for the rain
+    //an array of drops - one per column
+    var drops = [];
+    //x below is the x coordinate
+    //1 = y co-ordinate of the drop(same for every drop initially)
+    for(var x = 0; x < columns; x++)
+        drops[x] = 1; 
+
+    //drawing the characters
+    function draw()
+    {
+        //Black BG for the canvas
+        //translucent BG to show trail
+        ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        ctx.fillStyle = "#f4427d";//green text
+        ctx.font = font_size + "px arial";
+        //looping over drops
+        for(var i = 0; i < drops.length; i++)
+        {
+            //a random chinese character to print
+            var text = matr[Math.floor(Math.random()*matr.length)];
+            //x = i*font_size, y = value of drops[i]*font_size
+            ctx.fillText(text, i*font_size, drops[i]*font_size);
+
+            //sending the drop back to the top randomly after it has crossed the screen
+            //adding a randomness to the reset to make the drops scattered on the Y axis
+            if(drops[i]*font_size > c.height && Math.random() > 0.975)
+                drops[i] = 0;
+
+            //incrementing Y coordinate
+            drops[i]++;
+        }
+    }
+
+    var int = setInterval(draw, 33);
+    
+    c.focus();
+    
+    function keypress(evt)
+    {
+        c.removeEventListener('keypress', keypress, true);
+        c.removeEventListener('click', click, true);
+        
+        clearInterval(int);
+        
+        c.style.display = "none";
+        
+        terminal.style.display = "block";
+        
+        addInput();
+    }
+    function click(evt)
+    {
+        c.removeEventListener('keypress', keypress, true);
+        c.removeEventListener('click', click, true);
+        
+        clearInterval(int);
+        
+        c.style.display = "none";
+        
+        terminal.style.display = "block";
+        
+        addInput();
+    }
+    
+    c.addEventListener('keypress', keypress, true);
+    
+    c.addEventListener('click', click, true);
+    
+    return {'output': "<pre>Matrix animation from https://codepen.io/AchrafBoujjou/pen/RxjWXB</pre>", 'addInput': false};
+}
+
+
+function connect()
+{
+    var int;
+    
+    var progress = 0;
+    
+    var fillChars = ["=", "▓", "=", "▮", "■"];
+    var emptyChars = [" ", "░", ".", "▯", "□"];
+    var rand = Math.floor(Math.random() * fillChars.length);
+    
+    function drawProgress()
+    {
+        var preOutputs = document.getElementsByTagName("pre");
+        var preOutput = preOutputs[preOutputs.length - 1];
+        
+        ++progress;
+        
+        preOutput.innerHTML = " Connnecting [";
+        
+        
+        for (var i = 0; i < progress; ++i)
+            preOutput.innerHTML += fillChars[rand];
+        for (var i = progress; i < 20; ++i)
+            preOutput.innerHTML += emptyChars[rand];
+        preOutput.innerHTML += "] " + (progress * 5) + "%";
+
+        if (progress == 20)
+        {
+            preOutput.innerHTML += "<br /><br />Successfully connected";
+            
+            clearInterval(int);
+            
+            addInput();
+        }
+    }
+    
+    int = setInterval(drawProgress, 100);
+    
+    return {'output': '<span class="spinner"></span><pre> Connecting</pre>', 'addInput': false};
+}
+
+function datetime()
+{
+    var d = new Date();
+    return {'output': "<pre>" + d.toString() + "</pre>", 'addInput': true};
+}
+
+function echo(command)
+{
+    var i = command.indexOf(" ");
+    if (i > 0)
+        return {'output': "<pre>" + command.substr(i + 1) + "</pre>", 'addInput': true};
+    else
+        return {'output': "<pre>echo [string]</pre>", 'addInput': true};
+}
+
+function clear()
+{
+    terminal.innerHTML = "";
+    return {'output': "", 'addInput': true};
+}
+
+function history()
+{
+    return {'output': "<pre>"
+        + "V 1.4 commands = [history, about]<br />"
+        + "V 1.2 commands = [clear, matrix]<br />"
+        + "V 1.0 commands = [help, list, engage, connect, datetime, echo]"
+        + "</pre>"
+        , 'addInput': true};
+}
+
+function about()
+{
+    return {'output': "<pre>"
++"Azakios ©2020.All Rights Reserved"
++"</pre>"
+        , 'addInput': true};
+}
+//©Azakios.All Rights Reserved
+
+
+
+
+
+
+
+
+//Follow us On Youtube            
+        </script>
+        
+        <style>
+            /* Azakios Network */
+
+
+enum1{
+    color:purple;
+    
+}
+enum{
+    color:tomato;
+}
+
+body {
+    background: #000;
+}
+
+#terminal {
+    width: 100%;
+    height: 100%;
+    font-family: monospace;
+    background: #000;
+    color: #f00;
+}
+
+.center {
+    text-align: center;
+}
+
+#canvas {
+    position: fixed;
+    display: none;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.command {
+    width: 100%;
+    display: table;
+}
+
+.prompt {
+    color: #96b38a;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    display: table-cell;
+    width: 10%;
+    white-space: nowrap;
+}
+
+.commandInput {
+    background: #800;
+    color: gold;
+    border:20;
+    resize: 5;
+    margin: 0;
+    outline: 0;
+    width: 90%;
+    display: table-cell;
+    border-color:cyan;
+    
+}
+
+.output pre {
+    font-family: monospace;
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    display: inline;
+}
+
+a {
+    color: #0f0;
+}
+
+.spinner {
+  color: white;
+  min-height: 100vh;
+  display: inline;
+}
+
+.spinner:after {
+  animation: changeSpinner 1s linear 2;
+  content: "⠋";
+}
+
+@keyframes changeSpinner {
+  10% { content: "⠙"; }
+  20% { content: "⠹"; }
+  30% { content: "⠸"; }
+  40% { content: "⠼"; }
+  50% { content: "⠴"; }
+  60% { content: "⠦"; }
+  70% { content: "⠧"; }
+  80% { content: "⠇"; }
+  90% { content: "⠏"; }
+}
+            
+        </style>
+    </body>
+    <footer style="color:silver">&copy;Azakios 2020.All Rights Reserved</footer>
+    <footer style="color:green"><kbd> <a href="https://www.youtube.com/channel/UC3MiXrMHBKq5kBead2_4pEw?view_as=subscriber?sub_confirmation=1">SUBSCRIBE</kbd></footer>
+    
+    
+    
+</html>
